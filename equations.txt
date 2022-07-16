@@ -1,0 +1,19 @@
+Non - linear motion of pendulum:
+    theta1 = angle at time t
+    L = length of string
+    g = 9.8
+    b = 0.1 (damping coefficient)
+    m = 1 (mass of bob)
+
+    theta1" + b/m*(theta1') + g/L*(sin(theta1)) = 0
+    differentiation is w.r.t time
+
+    theta2 = theta1'
+    theta2' = -(b/m*(theta2) + g/L*(sin(theta1)))
+
+    theta1' is differentiation of angle w.r.t time which is called angular
+    velocity, so theta2 = angular velocity
+
+    initial conditions:
+    angle and angluar velocity both are set zero
+    
