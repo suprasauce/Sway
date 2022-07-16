@@ -1,8 +1,8 @@
 import pygame as py
 import numpy as np
 import colors
-from end_point import end_point as ep
-from bob import bob as b
+from entities.end_point import end_point as ep
+from entities.bob import bob as b
 
 py.init()
 
