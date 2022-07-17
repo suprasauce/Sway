@@ -11,6 +11,18 @@ class bob:
     def get_bob_pos(self,ep_x, ep_y):
         return [ep_x - self.width/2, ep_y]
 
+    def get_rect(self):
+        return py.Rect(self.x, self.y, self.width, self. height)
+
     def draw(self, screen, ep_x, ep_y):
         self.x, self.y = self.get_bob_pos(ep_x, ep_y)
-        py.draw.rect(screen, self.color, py.Rect(self.x, self.y, self.width, self.height))
+        py.draw.rect(screen, self.color, self.get_rect())
+
+    def parabolic_motion(self):
+        pass
+
+    def is_collision(self):
+        pass
+
+    def is_goal_reached(self):
+        pass

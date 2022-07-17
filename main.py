@@ -1,12 +1,13 @@
 import pygame as py
 import numpy as np
 import colors
+import game_constants as constants
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
 
 py.init()
 
-fps = 30
+fps = constants.FPS
 screen = py.display.set_mode()
 screen_width, screen_height = py.display.get_surface().get_size()
 clock = py.time.Clock()
