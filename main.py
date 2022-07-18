@@ -4,6 +4,7 @@ import colors
 import game_constants as constants
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
+from arc import arc as ar
 
 py.init()
 
@@ -14,10 +15,11 @@ clock = py.time.Clock()
 
 def main():
     run = True
-    pivot = (screen_width/4, screen_height/2)
-    ep_x, ep_y = screen_width/4, 3*screen_height/4
+    pivot = (screen_width/4, screen_height/3)
+    ep_x, ep_y = screen_width/4, 2*screen_height/3
     end_point = ep(ep_x, ep_y, pivot)
     bob =b(ep_x, ep_y)
+    arc = ar([screen_width, screen_height])
     while(run):
         clock.tick(fps)
         screen.fill(colors.WHITE)
@@ -30,6 +32,8 @@ def main():
         end_point.move()
         bob.draw(screen, end_point.x, end_point.y)
         py.draw.line(screen, colors.GREEN, pivot, [end_point.x, end_point.y],1)
+        arc.rotate()
+        arc.draw(screen)
         py.display.update()
 
 

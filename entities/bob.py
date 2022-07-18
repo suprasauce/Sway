@@ -1,10 +1,11 @@
 import colors
 import pygame as py
+import game_constants as constants
 
 class bob:
     def __init__(self, ep_x, ep_y):
-        self.width = 24
-        self.height = 24
+        self.width = constants.BOB_WIDTH
+        self.height = constants.BOB_HEIGHT
         self.color = colors.GREEN
         self.x, self.y = self.get_bob_pos(ep_x, ep_y)
 
