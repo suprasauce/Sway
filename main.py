@@ -15,6 +15,7 @@ clock = py.time.Clock()
 
 def main():
     run = True
+    free = True
     pivot = (screen_width/4, screen_height/3)
     ep_x, ep_y = screen_width/4, 2*screen_height/3
     end_point = ep(ep_x, ep_y, pivot)
@@ -27,9 +28,14 @@ def main():
             if event.type == py.QUIT:
                 run = False
             elif event.type == py.MOUSEBUTTONDOWN:
-                new_x, new_y = py.mouse.get_pos()
-                end_point.reset_attributes(new_x, new_y)
-        end_point.move()
+                free = False
+            elif event.type == py.MOUSEBUTTONUP:
+                free = True
+        if free:
+            end_point.move()
+        else:
+            new_x, new_y = py.mouse.get_pos()
+            end_point.reset_attributes(new_x, new_y)
         bob.draw(screen, end_point.x, end_point.y)
         py.draw.line(screen, colors.GREEN, pivot, [end_point.x, end_point.y],1)
         arc.rotate()
