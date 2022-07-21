@@ -4,7 +4,7 @@ from numpy import pad
 import colors
 import pygame as py
 from random import randint
-import game_constants as constants
+import constants 
 
 class arc:
     def __init__(self, screen_size):

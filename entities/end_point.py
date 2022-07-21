@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import game_constants as constants
+import constants
 
 
 class end_point:

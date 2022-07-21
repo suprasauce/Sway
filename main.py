@@ -2,10 +2,10 @@ import math
 import pygame as py
 import numpy as np
 import colors
-import game_constants as constants
+import constants 
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
-from arc import arc as ar
+from entities.arc import arc as ar
 
 py.init()
 

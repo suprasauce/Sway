@@ -1,6 +1,6 @@
 import colors
 import pygame as py
-import game_constants as constants
+import constants
 
 class bob:
     def __init__(self, ep_x, ep_y):
