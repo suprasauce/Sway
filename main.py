@@ -45,17 +45,15 @@ def main():
                     v_y = curr_velocity*math.sin(curr_angle)
                     bob.set_parabolic_motion_initials(v_x/2, v_y/2)
 
-        if not is_bob_free:
+        if is_bob_free:
+            bob.move()
+            bob.draw(screen, is_bob_free=is_bob_free)
+        else:
             if is_pen_free:
                 end_point.move()
             else:
                 new_x, new_y = py.mouse.get_pos()
                 end_point.reset_attributes(new_x, new_y)
-
-        if is_bob_free:
-            bob.move()
-            bob.draw(screen, is_bob_free=is_bob_free)
-        else:
             bob.draw(screen,  is_bob_free, end_point.x, end_point.y)
             py.draw.line(screen, colors.GREEN, pivot, [end_point.x, end_point.y],1)
 
