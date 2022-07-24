@@ -1,4 +1,6 @@
 import math, os, neat, colors, pygame as py, constants
+from random import randint
+from secrets import randbelow
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
 from entities.arc import arc as ar
@@ -267,10 +269,11 @@ def test():
     bobs = []
     end_points = [] # end_points for the bobs
     
-    for i in range(1):
+    for i in range(100):
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         end_points[i].is_free = True
+        end_points[i].theta1 = math.radians(randint(-120,-10))
 
     while(loop):
 

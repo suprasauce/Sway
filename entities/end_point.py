@@ -9,10 +9,10 @@ class end_point:
         self.pivot = pivot
         self.length = self.get_length()
         self.time = 0.0
-        self.theta1 = math.radians(randint(-120,0))
-        self.theta2 = math.radians(0.0)
-        # self.theta1 = 0.0
-        # self.theta2 = 0.0
+        # self.theta1 = math.radians(0.0)
+        # self.theta2 = math.radians(0.0)
+        self.theta1 = 0.0
+        self.theta2 = 0.0
         self.delta_time = constants.DELTA_TIME
         self.is_free = False # free from nnet hold
 
