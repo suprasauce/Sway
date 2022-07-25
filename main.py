@@ -37,7 +37,7 @@ def eval_genomes(genomes, config):
     # is_pen_free = True
     # is_bob_free = False
     pivot = (screen_width/4, screen_height/3)
-    ep_x, ep_y = screen_width/4, screen_height/3 + 10.0
+    ep_x, ep_y = screen_width/4, screen_height/3 + 100.0
     arc = ar([screen_width, screen_height])
 
     bobs = []
@@ -79,7 +79,7 @@ def eval_genomes(genomes, config):
         This loop handles all the movements of entities, check collisions, gives input 
         to the nnet and moves entities according to the output of nnet
         '''
-        for bob in bobs:
+        for bob in bobs[:]:
             if bob.is_free:
 
                 # assign fitness
@@ -206,6 +206,11 @@ def eval_genomes(genomes, config):
                     end_points[bobs.index(bob)].theta1 = math.radians(end_points[bobs.index(bob)].theta1)
                     end_points[bobs.index(bob)].theta2 = math.radians(0.0)
 
+                # print(end_points[bobs.index(bob)].theta1)
+                # print(len(bobs), end=" ")
+                # print(len(ge))
+                
+
         '''
         This for loop manages all the drawing stuff
         '''
@@ -257,7 +262,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 100 generations.
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes, 100)
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
@@ -277,7 +282,7 @@ def test():
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         end_points[i].is_free = True
-        end_points[i].theta1 = math.radians(randint(-90,-60))
+        end_points[i].theta1 = math.radians(117)
 
     while(loop):
 
@@ -339,10 +344,24 @@ if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
     # current working directory.
-    #test()
+    # test()
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config_feedforward.txt')
     run(config_path)
+    # pp = [10,20,30,40,50]
+    # yo = [11,21,31,41,51]
+    # for i in pp[:]:
+    #     if i is 30 or i is 50:
+    #         yo.pop(pp.index(i))
+    #         pp.pop(pp.index(i))
+    #         continue
+    #     print(len(pp), end=" ")
+    #     print(i)
+        
+    # print(pp)
+    # print(yo)
+        
+
 
 
 

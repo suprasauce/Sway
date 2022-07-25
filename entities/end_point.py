@@ -28,20 +28,20 @@ class end_point:
         self.x, self.y = self.get_new_pos()
 
     def get_new_pos(self):
-        return [self.pivot[0] + self.length*math.sin(self.theta1), self.pivot[1] + self.length*math.cos(self.theta1)]
+        return [self.pivot[0] + self.length*math.sin(math.radians(self.theta1)), self.pivot[1] + self.length*math.cos(math.radians(self.theta1))]
 
     def get_length(self):
         return round(math.dist([self.x, self.y], self.pivot))
 
 
-    def get_angle(self):
-        temp, sign = 0.0, 1
-        if self.y < self.pivot[1]:
-            temp = 180 if self.is_free else math.pi
-            sign = -1
-        if self.x < self.pivot[0]:
-            temp *= -1.0
-        return temp + sign*math.asin((self.x - self.pivot[0])/self.length)
+    # def get_angle(self):
+    #     temp, sign = 0.0, 1
+    #     if self.y < self.pivot[1]:
+    #         temp = 180 if self.is_free else math.pi
+    #         sign = -1
+    #     if self.x < self.pivot[0]:
+    #         temp *= -1.0
+    #     return temp + sign*math.asin((self.x - self.pivot[0])/self.length)
 
     def reset_attributes(self, new_x = 0, new_y = 0):
         self.x, self.y = self.get_new_pos()
