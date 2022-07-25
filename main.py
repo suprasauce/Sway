@@ -15,10 +15,10 @@ def get_inputs(bob, arc, pivot):
     # total 12 inputs
     # [u_w, b_w, l_w, r_w, dy_start_bob, dx_start_bob, dy_stop_bob, dx_stop_bob, dy_obsatcle_bob, dx_obstacle_bob, dy_pivot_bob, dx_pivot_bob]    
     inputs = []
-    inputs.append(bob.y - bob.height/2)
-    inputs.append(screen_height - bob.y - bob.height/2)
-    inputs.append(bob.x - bob.width/2)
-    inputs.append(screen_width - bob.x - bob.width/2)
+    inputs.append(bob.y)
+    inputs.append(screen_height - bob.y)
+    inputs.append(bob.x)
+    inputs.append(screen_width - bob.x)
     inputs.append(arc.start_angle_pos[1] - bob.y)
     inputs.append(arc.start_angle_pos[0] - bob.x)
     inputs.append(arc.stop_angle_pos[1] - bob.y)
@@ -31,13 +31,13 @@ def get_inputs(bob, arc, pivot):
 
 def eval_genomes(genomes, config):
 
-    # at 60 fps running one simulation for 60 seconds
-    frames = 3600
+    # at 60 fps running one simulation for 30 seconds
+    frames = 1800
     loop = True
     # is_pen_free = True
     # is_bob_free = False
     pivot = (screen_width/4, screen_height/3)
-    ep_x, ep_y = screen_width/4, 2*screen_height/3
+    ep_x, ep_y = screen_width/4, screen_height/3
     arc = ar([screen_width, screen_height])
 
     bobs = []
@@ -90,7 +90,7 @@ def eval_genomes(genomes, config):
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
-                    ge[bobs.index(bob)].fitness -= 1.0
+                    ge[bobs.index(bob)].fitness -= 0.2
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -120,7 +120,7 @@ def eval_genomes(genomes, config):
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
-                    ge[bobs.index(bob)].fitness -= 1.0
+                    ge[bobs.index(bob)].fitness -= 0.2
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
