@@ -1,6 +1,5 @@
 import math
 from random import randint
-from numpy import pad
 import colors
 import pygame as py
 from random import randint
@@ -14,9 +13,13 @@ class arc:
         self.start_angle, self.stop_angle = self.get_initial_angles()
         self.start_angle_pos, self.stop_angle_pos = self.update_start_stop_pos() 
         self.angular_velocity = randint(10,20)/500
+        self.surface = py.Surface((2*self.radius, 2*self.radius))
+        self.surface.set_colorkey(colors.WHITE)
+        # self.surface.fill(colors.WHITE)
+        self.rect = self.surface.get_rect()
 
-    def get_rect(self):
-        return py.Rect(self.center[0] - self.radius, self.center[1] - self.radius, 2*self.radius, 2*self.radius)
+    # def get_rect(self):
+    #     return self.surface.get_rect()
 
     def get_initial_angles(self):
         theta = 2*math.degrees(math.atan(constants.BOB_RADIUS/self.radius))
@@ -29,7 +32,65 @@ class arc:
         self.stop_angle = (self.angular_velocity + self.stop_angle)%(math.pi*2)
 
     def update_start_stop_pos(self):
-        pass
+        pos = []
+        # for start_angle_pos
+        if self.start_angle <= math.pi/2.0:
+            x = self.center[0] + self.radius*math.cos(self.start_angle)
+            y = self.center[1] - self.radius*math.sin(self.start_angle)
+            pos.append([x, y])
+        elif self.start_angle <= math.pi:
+            y = self.center[1] + self.radius*math.cos(self.start_angle)
+            x = self.center[0] - self.radius*math.sin(self.start_angle)
+            pos.append([x, y])
+        elif self.start_angle  <= math.pi + math.pi/2.0:
+            x = self.center[0] + self.radius*math.cos(self.start_angle)
+            y = self.center[1] - self.radius*math.sin(self.start_angle)
+            pos.append([x, y])
+        else:
+            y = self.center[1] + self.radius*math.cos(self.start_angle)
+            x = self.center[0] - self.radius*math.sin(self.start_angle)
+            pos.append([x, y])
+        
+        # for stop_angle_pos
+        if self.start_angle <= math.pi/2.0:
+            x = self.center[0] + self.radius*math.cos(self.stop_angle)
+            y = self.center[1] - self.radius*math.sin(self.stop_angle)
+            pos.append([x, y])
+        elif self.start_angle <= math.pi:
+            y = self.center[1] + self.radius*math.cos(self.stop_angle)
+            x = self.center[0] - self.radius*math.sin(self.stop_angle)
+            pos.append([x, y])
+        elif self.start_angle  <= math.pi + math.pi/2.0:
+            x = self.center[0] + self.radius*math.cos(self.stop_angle)
+            y = self.center[1] - self.radius*math.sin(self.stop_angle)
+            pos.append([x, y])
+        else:
+            y = self.center[1] + self.radius*math.cos(self.stop_angle)
+            x = self.center[0] - self.radius*math.sin(self.stop_angle)
+            pos.append([x, y])
+
+        self.start_angle_pos = pos[0]
+        self.stop_angle_pos = pos[1]
+
+        return pos
+
+    def get_mask(self):
+        return py.mask.from_surface(self.surface)
+
+    # def create_and_get_new_surface(self):
+    #     arc_surface = py.Surface((2*self.radius, 2*self.radius))
+    #     arc_surface.fill(colors.WHITE)
+    #     # set color_key of the surface to white such that all the white colored
+    #     # pixels in that surface become transparent, this is useful when checking
+    #     # if masks overlap or not, as non transparent pixel will be set to 1.
+    #     arc_surface.set_colorkey(colors.WHITE)
+    #     # rect necessary in order to draw an arc
+    #     arc_rect = arc_surface.get_rect()
+    #     py.draw.arc(arc_surface, self.color, arc_rect, self.start_angle, self.stop_angle,6)
+    #     return arc_surface
 
     def draw(self, screen):
-        py.draw.arc(screen, self.color, self.get_rect(), self.start_angle, self.stop_angle,6)
+        #arc_surface = self.create_and_get_new_surface()
+        self.surface.fill(colors.WHITE)
+        py.draw.arc(self.surface, self.color, self.rect, self.start_angle, self.stop_angle,6)
+        screen.blit(self.surface, (self.center[0]-self.radius,self.center[1] - self.radius))

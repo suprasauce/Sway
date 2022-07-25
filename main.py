@@ -1,6 +1,5 @@
 import math, os, neat, colors, pygame as py, constants
 from random import randint
-from secrets import randbelow
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
 from entities.arc import arc as ar
@@ -73,6 +72,8 @@ def eval_genomes(genomes, config):
                     # v_y = curr_velocity*math.sin(curr_angle)
                     # bob.set_parabolic_motion_initials(v_x/2, v_y/2)
 
+        # drawing the obstacle
+        arc.draw(screen)
 
         ''' 
         This loop handles all the movements of entities, check collisions, gives input 
@@ -82,13 +83,13 @@ def eval_genomes(genomes, config):
             if bob.is_free:
 
                 # assign fitness
-                ge[bobs.index(bob)].fitness = 1.0/abs(bob.center, arc.center)
+                ge[bobs.index(bob)].fitness = 1.0/math.dist([bob.x, bob.y], arc.center)
                 
                 # first move
                 bob.move()
 
                 # penalize if bob out of screen and if so then erase
-                if bob.is_collision():
+                if bob.is_collision(screen_width, screen_height, arc):
                     ge[bobs.index(bob)].fitness -= 1.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
@@ -98,7 +99,7 @@ def eval_genomes(genomes, config):
 
                 if bob.is_goal_reached(arc.center, arc.radius):
                     # assign fitness
-                    ge[bobs.index(bob)].fitness = 1.0/abs(bob.center, arc.center) + 1.0
+                    ge[bobs.index(bob)].fitness = 1.0/math.dist([bob.x, bob.y], arc.center) + 1.0
 
                     # erase 
                     nnets.pop(bobs.index(bob))
@@ -110,15 +111,15 @@ def eval_genomes(genomes, config):
             elif end_points[bobs.index(bob)].is_free:
                 
                 # assign fitness as the bob was alive till the previous frame
-                ge[bobs.index(bob)].fitness = 1.0/abs(bob.center, arc.center)                
+                ge[bobs.index(bob)].fitness = 1.0/math.dist([bob.x, bob.y], arc.center)                
 
                 # first move end_point and update bob pos
                 end_points[bobs.index(bob)].move()
-                bob.x, bob.y = bob.get_bob_pos(end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y)
+                bob.x, bob.y = end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y
 
 
                 # penalize if bob out of screen and if so then erase
-                if bob.is_collision():
+                if bob.is_collision(screen_width, screen_height, arc):
                     ge[bobs.index(bob)].fitness -= 1.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
@@ -154,7 +155,7 @@ def eval_genomes(genomes, config):
                 end_points[bobs.index(bob)].length += 1.0 if outputs[0] >= 0.5 else 0.0
                 
                 # end_point initial_angle
-                end_points[bobs.index(bob)].theta1 += -0.5 if outputs[1] >= 0.5 else 0.0
+                end_points[bobs.index(bob)].theta1 += -1.0 if outputs[1] >= 0.5 else 0.0
                 
                 # penalize, if theta1 < -180 update fitness and erase
                 if end_points[bobs.index(bob)].theta1 < -180.0:
@@ -165,7 +166,7 @@ def eval_genomes(genomes, config):
                     continue
 
                 # end_point throw_angle
-                bob.throw_angle += 0.5 if outputs[2] >= 0.5 else 0.0
+                bob.throw_angle += 1.0 if outputs[2] >= 0.5 else 0.0
 
                 # should i penalise throw_angle?
                 if bob.throw_angle > 180.0:
@@ -179,10 +180,10 @@ def eval_genomes(genomes, config):
                 end_points[bobs.index(bob)].reset_attributes()
 
                 # upate bob pos
-                bob.x, bob.y = bob.get_bob_pos(end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y)
+                bob.x, bob.y = end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y
                 
                 # penalize if bob out of screen and if so then erase
-                if bob.is_collision():
+                if bob.is_collision(screen_width, screen_height, arc):
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -190,7 +191,7 @@ def eval_genomes(genomes, config):
                     continue
                 
                 # if we should free the end_point
-                end_points[bobs.index(bob)].is_free = True if outputs[3] >= 0.5 else 0.0
+                end_points[bobs.index(bob)].is_free = True if outputs[3] >= 0.5 else False
                 
                 if end_points[bobs.index(bob)].is_free is True:
                     
@@ -229,11 +230,14 @@ def eval_genomes(genomes, config):
         #     bob.draw(screen,  is_bob_free, end_point.x, end_point.y)
         #     py.draw.line(screen, colors.GREEN, pivot, [end_point.x, end_point.y],1)
 
-        # updating and drawing the obstacle
+        # update angles of the arc
         arc.rotate()
-        arc.draw(screen)
+        arc.update_start_stop_pos()
 
         frames -= 1
+
+        if len(bobs) == 0:
+            loop = False
         
         py.display.update()
 
@@ -255,7 +259,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 100 generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes, 50)
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
@@ -268,12 +272,14 @@ def test():
 
     bobs = []
     end_points = [] # end_points for the bobs
+
+    arc = ar([screen_width, screen_height])
     
     for i in range(100):
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         end_points[i].is_free = True
-        end_points[i].theta1 = math.radians(randint(-120,-10))
+        end_points[i].theta1 = math.radians(randint(-90,-60))
 
     while(loop):
 
@@ -293,23 +299,40 @@ def test():
                         v_y = curr_velocity*math.sin(curr_angle)
                         bob.set_parabolic_motion_initials(v_x/2, v_y/2)
         
-        '''
-        This for loop manages all the drawing stuff
-        '''
+        
         for i, bob in enumerate(bobs):
             if not bob.is_free:
                 end_points[i].move()
-                bob.x, bob.y = bob.get_bob_pos(end_points[i].x, end_points[i].y)
+                bob.x, bob.y = end_points[i].x, end_points[i].y
             else:
                 bob.move()
 
+        arc.rotate()
+        arc.draw(screen)
+        arc.update_start_stop_pos()
+
+        
+        '''
+        check for collisions of bob with arc, or walls
+        '''
+        for bob in bobs:
+            if bob.is_goal_reached(arc.center, arc.radius):
+                pass
+            if bob.is_collision(screen_width, screen_height, arc):
+                loop = False
+        
+        '''
+        This for loop manages all the drawing stuff
+        '''
         for bob in bobs:
             bob.draw(screen)
             if not bob.is_free:
                 # draw string
                 py.draw.line(screen, colors.GREEN, pivot, [end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y],1)
 
+        
         py.display.update()
+
 
     
 
@@ -318,10 +341,10 @@ if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
     # current working directory.
-    test()
-    # local_dir = os.path.dirname(__file__)
-    # config_path = os.path.join(local_dir, 'config-feedforward.txt')
-    # run(config_path)
+    #test()
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config_feedforward.txt')
+    run(config_path)
 
 
 
