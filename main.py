@@ -37,7 +37,7 @@ def eval_genomes(genomes, config):
     # is_pen_free = True
     # is_bob_free = False
     pivot = (screen_width/4, screen_height/3)
-    ep_x, ep_y = screen_width/4, screen_height/3
+    ep_x, ep_y = screen_width/4, screen_height/3 + 10.0
     arc = ar([screen_width, screen_height])
 
     bobs = []
