@@ -35,7 +35,7 @@ def get_inputs(bob, arc, pivot):
 def eval_genomes(genomes, config):
 
     # at 60 fps running one simulation for 30 seconds
-    frames = 1200
+    frames = 1800
     loop = True
     # is_pen_free = True
     # is_bob_free = False

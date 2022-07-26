@@ -28,7 +28,7 @@ class arc:
     def get_initial_angles(self):
         theta = 2*math.degrees(math.atan(constants.BOB_RADIUS/self.radius))
         new_stop_angle = math.radians(randint(0,360))
-        new_start_angle = math.radians((math.degrees(new_stop_angle) + theta + randint(0,45))%360)
+        new_start_angle = math.radians((math.degrees(new_stop_angle) + theta + randint(10,45))%360)
         return [new_start_angle, new_stop_angle]
 
     def rotate(self):
