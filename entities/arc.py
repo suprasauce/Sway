@@ -8,7 +8,8 @@ import constants
 class arc:
     def __init__(self, screen_size):
         self.center = [5.0*screen_size[0]/6.0, screen_size[1]/2.0]
-        self.radius = randint(2.0*constants.BOB_WIDTH, screen_size[0]/6.0)
+        # self.radius = randint(2.0*constants.BOB_WIDTH, screen_size[0]/6.0)
+        self.radius = 200.0
         self.color = colors.GREEN
         # self.start_angle, self.stop_angle = self.get_initial_angles()
         self.start_angle, self.stop_angle = math.radians(120.0), math.radians(60.0)
@@ -18,6 +19,7 @@ class arc:
         self.surface.set_colorkey(colors.WHITE)
         # self.surface.fill(colors.WHITE)
         self.rect = self.surface.get_rect()
+        arc.bobby = [self.center[0], self.center[1] - self.radius]
 
     # def get_rect(self):
     #     return self.surface.get_rect()

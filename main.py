@@ -1,6 +1,4 @@
-from faulthandler import disable
 import math, os, neat, colors, pygame as py, constants
-from turtle import distance
 from random import randint
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
@@ -29,6 +27,9 @@ def get_inputs(bob, arc, pivot):
     inputs.append(arc.center[0] - bob.x)
     inputs.append(pivot[1] - bob.y)
     inputs.append(pivot[0] - bob.x)
+    # adding two extra values, so now total 14 inputs
+    inputs.append(arc.bobby[1] - bob.y)
+    inputs.append(arc.bobby[0] - bob.x)
     return inputs
 
 def eval_genomes(genomes, config):
@@ -48,7 +49,7 @@ def eval_genomes(genomes, config):
     ge = []   # stores the genome for the corresponding bob
 
     for genome_id, genome in genomes:
-        genome.fitness = -50.0
+        genome.fitness = -1000000.0
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         ge.append(genome)
@@ -83,28 +84,33 @@ def eval_genomes(genomes, config):
         '''
         for bob in bobs[:]:
             if bob.is_free:
+                
+                bob_a = math.dist([bob.x, bob.y], arc.center)**2
+                bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached*1.0*(1.0 / bob_a + bob_b) 
 
-                distance = 1.0 if bob.is_goal_reached else math.dist([bob.x, bob.y], arc.center)
+                ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)
 
-                # assign fitness
-                if bob.is_goal_reached(arc.center, arc.radius):
-                    # assign fitness
-                    ge[bobs.index(bob)].fitness = max(1.0/distance ,ge[bobs.index(bob)].fitness) + 50.0
+                # # assign fitness
+                # if bob.is_goal_reached(arc.center, arc.radius):
+                #     # assign fitness
+                #     ge[bobs.index(bob)].fitness = max(1.0/distance ,ge[bobs.index(bob)].fitness) + 50.0
 
-                    # erase 
-                    # nnets.pop(bobs.index(bob))
-                    # end_points.pop(bobs.index(bob))
-                    # ge.pop(bobs.index(bob))
-                    # bobs.pop(bobs.index(bob))
-                    # continue
-                else:
-                    ge[bobs.index(bob)].fitness = max(1.0/distance,ge[bobs.index(bob)].fitness)
+                #     # erase 
+                #     # nnets.pop(bobs.index(bob))
+                #     # end_points.pop(bobs.index(bob))
+                #     # ge.pop(bobs.index(bob))
+                #     # bobs.pop(bobs.index(bob))
+                #     # continue
+                # else:
+                #     ge[bobs.index(bob)].fitness = max(1.0/distance,ge[bobs.index(bob)].fitness)
                 
                 # first move
                 bob.move()
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
+                    ge[bobs.index(bob)].fitness -= (2.0/ge[bobs.index(bob)].fitness)
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -116,7 +122,11 @@ def eval_genomes(genomes, config):
             elif end_points[bobs.index(bob)].is_free:
                 
                 # assign fitness as the bob was alive till the previous frame
-                ge[bobs.index(bob)].fitness = max(1.0/(math.dist([bob.x, bob.y], arc.center)),ge[bobs.index(bob)].fitness)             
+                bob_a = math.dist([bob.x, bob.y], arc.center)**2
+                bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_free*1.0*(1.0 / bob_a + bob_b) 
+
+                ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)           
 
                 # first move end_point and update bob pos
                 end_points[bobs.index(bob)].move()
@@ -125,6 +135,7 @@ def eval_genomes(genomes, config):
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
+                    ge[bobs.index(bob)].fitness -= (2.0/ge[bobs.index(bob)].fitness)
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -163,6 +174,7 @@ def eval_genomes(genomes, config):
                 
                 # penalize, if theta1 < -180 update fitness and erase
                 if end_points[bobs.index(bob)].theta1 <= -180.0:
+                    ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -174,6 +186,7 @@ def eval_genomes(genomes, config):
 
                 # should i penalise throw_angle?
                 if bob.throw_angle >= 180.0:
+                    ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -188,6 +201,7 @@ def eval_genomes(genomes, config):
                 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
+                    ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -201,12 +215,18 @@ def eval_genomes(genomes, config):
                     
                     # should i penalise throw_angle?
                     if bob.throw_angle > abs(end_points[bobs.index(bob)].theta1):
-                        ge[bobs.index(bob)].fitness = -100.0
+                        ge[bobs.index(bob)].fitness *= 2.0
                         nnets.pop(bobs.index(bob))
                         end_points.pop(bobs.index(bob))
                         ge.pop(bobs.index(bob))
                         bobs.pop(bobs.index(bob))
                         continue
+
+                    # assign fitness as the bob was alive till the previous frame
+                    bob_a = math.dist([bob.x, bob.y], arc.center)**2
+                    bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
+                    curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_free*1.0*(1.0 / bob_a + bob_b) 
+                    ge[bobs.index(bob)].fitness = curr_fitness
                     
                     # convert degrees to radians
                     bob.throw_angle = math.radians(bob.throw_angle)
@@ -249,10 +269,10 @@ def eval_genomes(genomes, config):
         if len(bobs) == 0:
             loop = False
 
-        if not loop or frames == 0:
-            for bob in bobs:
-                if not end_points[bobs.index(bob)].is_free:
-                    ge[bobs.index(bob)].fitness = -100.0
+        # if not loop or frames == 0:
+        #     for bob in bobs:
+        #         if not end_points[bobs.index(bob)].is_free:
+        #             ge[bobs.index(bob)].fitness = -100.0
         
         py.display.update()
 
