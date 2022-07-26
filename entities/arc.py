@@ -10,7 +10,8 @@ class arc:
         self.center = [5.0*screen_size[0]/6.0, screen_size[1]/2.0]
         self.radius = randint(2.0*constants.BOB_WIDTH, screen_size[0]/6.0)
         self.color = colors.GREEN
-        self.start_angle, self.stop_angle = self.get_initial_angles()
+        # self.start_angle, self.stop_angle = self.get_initial_angles()
+        self.start_angle, self.stop_angle = math.radians(120.0), math.radians(60.0)
         self.start_angle_pos, self.stop_angle_pos = self.update_start_stop_pos() 
         self.angular_velocity = randint(10,20)/500
         self.surface = py.Surface((2*self.radius, 2*self.radius))
@@ -28,8 +29,9 @@ class arc:
         return [new_start_angle, new_stop_angle]
 
     def rotate(self):
-        self.start_angle = (self.angular_velocity + self.start_angle)%(math.pi*2)
-        self.stop_angle = (self.angular_velocity + self.stop_angle)%(math.pi*2)
+        # self.start_angle = (self.angular_velocity + self.start_angle)%(math.pi*2)
+        # self.stop_angle = (self.angular_velocity + self.stop_angle)%(math.pi*2)
+        pass
 
     def update_start_stop_pos(self):
         pos = []

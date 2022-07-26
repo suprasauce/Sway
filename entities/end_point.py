@@ -28,7 +28,8 @@ class end_point:
         self.x, self.y = self.get_new_pos()
 
     def get_new_pos(self):
-        return [self.pivot[0] + self.length*math.sin(math.radians(self.theta1)), self.pivot[1] + self.length*math.cos(math.radians(self.theta1))]
+        angle = self.theta1 if self.is_free else math.radians(self.theta1)
+        return [self.pivot[0] + self.length*math.sin(angle), self.pivot[1] + self.length*math.cos(angle)]
 
     def get_length(self):
         return round(math.dist([self.x, self.y], self.pivot))

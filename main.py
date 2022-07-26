@@ -1,4 +1,6 @@
+from faulthandler import disable
 import math, os, neat, colors, pygame as py, constants
+from turtle import distance
 from random import randint
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
@@ -32,7 +34,7 @@ def get_inputs(bob, arc, pivot):
 def eval_genomes(genomes, config):
 
     # at 60 fps running one simulation for 30 seconds
-    frames = 1800
+    frames = 1200
     loop = True
     # is_pen_free = True
     # is_bob_free = False
@@ -46,7 +48,7 @@ def eval_genomes(genomes, config):
     ge = []   # stores the genome for the corresponding bob
 
     for genome_id, genome in genomes:
-        genome.fitness = -math.inf
+        genome.fitness = -50.0
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         ge.append(genome)
@@ -82,8 +84,21 @@ def eval_genomes(genomes, config):
         for bob in bobs[:]:
             if bob.is_free:
 
+                distance = 1.0 if bob.is_goal_reached else math.dist([bob.x, bob.y], arc.center)
+
                 # assign fitness
-                ge[bobs.index(bob)].fitness = -(math.dist([bob.x, bob.y], arc.center))**2
+                if bob.is_goal_reached(arc.center, arc.radius):
+                    # assign fitness
+                    ge[bobs.index(bob)].fitness = max(1.0/distance ,ge[bobs.index(bob)].fitness) + 50.0
+
+                    # erase 
+                    # nnets.pop(bobs.index(bob))
+                    # end_points.pop(bobs.index(bob))
+                    # ge.pop(bobs.index(bob))
+                    # bobs.pop(bobs.index(bob))
+                    # continue
+                else:
+                    ge[bobs.index(bob)].fitness = max(1.0/distance,ge[bobs.index(bob)].fitness)
                 
                 # first move
                 bob.move()
@@ -96,21 +111,12 @@ def eval_genomes(genomes, config):
                     bobs.pop(bobs.index(bob))
                     continue
 
-                if bob.is_goal_reached(arc.center, arc.radius):
-                    # assign fitness
-                    ge[bobs.index(bob)].fitness = 0.0
-
-                    # erase 
-                    nnets.pop(bobs.index(bob))
-                    end_points.pop(bobs.index(bob))
-                    ge.pop(bobs.index(bob))
-                    bobs.pop(bobs.index(bob))
-                    continue
+                
                     
             elif end_points[bobs.index(bob)].is_free:
                 
                 # assign fitness as the bob was alive till the previous frame
-                ge[bobs.index(bob)].fitness = -(math.dist([bob.x, bob.y], arc.center))**2                
+                ge[bobs.index(bob)].fitness = max(1.0/(math.dist([bob.x, bob.y], arc.center)),ge[bobs.index(bob)].fitness)             
 
                 # first move end_point and update bob pos
                 end_points[bobs.index(bob)].move()
@@ -132,7 +138,7 @@ def eval_genomes(genomes, config):
                     curr_angle = end_points[bobs.index(bob)].theta1
                     v_x = curr_velocity*math.cos(curr_angle)
                     v_y = curr_velocity*math.sin(curr_angle)
-                    bob.set_parabolic_motion_initials(v_x/2, v_y/2)
+                    bob.set_parabolic_motion_initials(1.2*v_x/constants.MASS, 1.2*v_y/constants.MASS)
 
                 
 
@@ -195,6 +201,7 @@ def eval_genomes(genomes, config):
                     
                     # should i penalise throw_angle?
                     if bob.throw_angle > abs(end_points[bobs.index(bob)].theta1):
+                        ge[bobs.index(bob)].fitness = -100.0
                         nnets.pop(bobs.index(bob))
                         end_points.pop(bobs.index(bob))
                         ge.pop(bobs.index(bob))
@@ -241,6 +248,11 @@ def eval_genomes(genomes, config):
 
         if len(bobs) == 0:
             loop = False
+
+        if not loop or frames == 0:
+            for bob in bobs:
+                if not end_points[bobs.index(bob)].is_free:
+                    ge[bobs.index(bob)].fitness = -100.0
         
         py.display.update()
 
@@ -278,11 +290,11 @@ def test():
 
     arc = ar([screen_width, screen_height])
     
-    for i in range(100):
+    for i in range(1):
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         end_points[i].is_free = True
-        end_points[i].theta1 = math.radians(117)
+        end_points[i].theta1 = math.radians(randint(-170.0, -60.0))
 
     while(loop):
 
@@ -300,7 +312,7 @@ def test():
                         curr_angle = end_points[bobs.index(bob)].theta1
                         v_x = curr_velocity*math.cos(curr_angle)
                         v_y = curr_velocity*math.sin(curr_angle)
-                        bob.set_parabolic_motion_initials(v_x/2, v_y/2)
+                        bob.set_parabolic_motion_initials(1.2*v_x/constants.MASS, 1.2*v_y/constants.MASS)
         
         
         for i, bob in enumerate(bobs):
