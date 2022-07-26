@@ -1,4 +1,4 @@
-import math, os, neat, colors, pygame as py, constants
+import math, os, neat, colors, pygame as py, constants, pickle
 from random import randint
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
@@ -28,8 +28,8 @@ def get_inputs(bob, arc, pivot):
     inputs.append(pivot[1] - bob.y)
     inputs.append(pivot[0] - bob.x)
     # adding two extra values, so now total 14 inputs
-    inputs.append(arc.bobby[1] - bob.y)
-    inputs.append(arc.bobby[0] - bob.x)
+    inputs.append(arc.mid_angle_pos - bob.y)
+    inputs.append(arc.mid_angle_pos - bob.x)
     return inputs
 
 def eval_genomes(genomes, config):
@@ -40,7 +40,7 @@ def eval_genomes(genomes, config):
     # is_pen_free = True
     # is_bob_free = False
     pivot = (screen_width/4, screen_height/3)
-    ep_x, ep_y = screen_width/4, screen_height/3 + 100.0
+    ep_x, ep_y = screen_width/4, screen_height/3 + 1.0
     arc = ar([screen_width, screen_height])
 
     bobs = []
@@ -48,8 +48,10 @@ def eval_genomes(genomes, config):
     nnets = [] # stores the nnet for the corresponding bob
     ge = []   # stores the genome for the corresponding bob
 
+    
+
     for genome_id, genome in genomes:
-        genome.fitness = -1000000.0
+        genome.fitness = -math.inf
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         ge.append(genome)
@@ -77,6 +79,9 @@ def eval_genomes(genomes, config):
 
         # drawing the obstacle
         arc.draw(screen)
+        py.draw.line(screen,colors.RED,arc.center,arc.start_angle_pos)
+        py.draw.line(screen,colors.RED,arc.center,arc.mid_angle_pos)
+        py.draw.line(screen,colors.RED,arc.center,arc.stop_angle_pos)
 
         ''' 
         This loop handles all the movements of entities, check collisions, gives input 
@@ -84,10 +89,10 @@ def eval_genomes(genomes, config):
         '''
         for bob in bobs[:]:
             if bob.is_free:
-                
+                bob.goal_reached = bob.is_goal_reached(arc.center, arc.radius)
                 bob_a = math.dist([bob.x, bob.y], arc.center)**2
                 bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.goal_reached*1.0*(1.0 / bob_a + math.sqrt(bob_b)) 
 
                 ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)
 
@@ -110,7 +115,8 @@ def eval_genomes(genomes, config):
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
-                    ge[bobs.index(bob)].fitness -= (2.0/ge[bobs.index(bob)].fitness)
+                    if not bob.goal_reached:
+                        ge[bobs.index(bob)].fitness = -(1.0/ge[bobs.index(bob)].fitness)
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -122,9 +128,10 @@ def eval_genomes(genomes, config):
             elif end_points[bobs.index(bob)].is_free:
                 
                 # assign fitness as the bob was alive till the previous frame
+                bob.goal_reached = bob.is_goal_reached(arc.center, arc.radius)
                 bob_a = math.dist([bob.x, bob.y], arc.center)**2
                 bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.goal_reached*1.0*(1.0 / bob_a + math.sqrt(bob_b)) 
 
 
                 ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)           
@@ -136,7 +143,7 @@ def eval_genomes(genomes, config):
 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
-                    ge[bobs.index(bob)].fitness -= (2.0/ge[bobs.index(bob)].fitness)
+                    ge[bobs.index(bob)].fitness = -(1.0/ge[bobs.index(bob)].fitness)
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -175,7 +182,7 @@ def eval_genomes(genomes, config):
                 
                 # penalize, if theta1 < -180 update fitness and erase
                 if end_points[bobs.index(bob)].theta1 <= -180.0:
-                    ge[bobs.index(bob)].fitness *= 2.0
+                    #ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -187,7 +194,7 @@ def eval_genomes(genomes, config):
 
                 # should i penalise throw_angle?
                 if bob.throw_angle >= 180.0:
-                    ge[bobs.index(bob)].fitness *= 2.0
+                    #ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -202,7 +209,7 @@ def eval_genomes(genomes, config):
                 
                 # penalize if bob out of screen and if so then erase
                 if bob.is_collision(screen_width, screen_height, arc):
-                    ge[bobs.index(bob)].fitness *= 2.0
+                    #ge[bobs.index(bob)].fitness *= 2.0
                     nnets.pop(bobs.index(bob))
                     end_points.pop(bobs.index(bob))
                     ge.pop(bobs.index(bob))
@@ -216,7 +223,7 @@ def eval_genomes(genomes, config):
                     
                     # should i penalise throw_angle?
                     if bob.throw_angle > abs(end_points[bobs.index(bob)].theta1):
-                        ge[bobs.index(bob)].fitness *= 2.0
+                        #ge[bobs.index(bob)].fitness *= 2.0
                         nnets.pop(bobs.index(bob))
                         end_points.pop(bobs.index(bob))
                         ge.pop(bobs.index(bob))
@@ -224,9 +231,10 @@ def eval_genomes(genomes, config):
                         continue
 
                     # assign fitness as the bob was alive till the previous frame
+                    bob.goal_reached = bob.is_goal_reached(arc.center, arc.radius)
                     bob_a = math.dist([bob.x, bob.y], arc.center)**2
                     bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                    curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
+                    curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.goal_reached*1.0*(1.0 / bob_a + math.sqrt(bob_b)) 
  
                     ge[bobs.index(bob)].fitness = curr_fitness
                     
@@ -274,7 +282,7 @@ def eval_genomes(genomes, config):
         # if not loop or frames == 0:
         #     for bob in bobs:
         #         if not end_points[bobs.index(bob)].is_free:
-        #             ge[bobs.index(bob)].fitness = -100.0
+        #             ge[bobs.index(bob)].fitness = -math.inf
         
         py.display.update()
 
@@ -296,16 +304,22 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 100 generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes, 500)
+
+    with open('model_2','wb') as files:
+        pickle.dump(winner, files)
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
         
-def test():
-
+def test(config_file):
+ # Load configuration.
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_file)
     loop = True
     pivot = (screen_width/4, screen_height/3)
-    ep_x, ep_y = screen_width/4, 2*screen_height/3
+    ep_x, ep_y = screen_width/4, screen_height/3 + 1.0
 
     bobs = []
     end_points = [] # end_points for the bobs
@@ -315,8 +329,13 @@ def test():
     for i in range(1):
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
-        end_points[i].is_free = True
-        end_points[i].theta1 = math.radians(randint(-170.0, -60.0))
+        #end_points[i].is_free = True
+        #end_points[i].theta1 = math.radians(randint(-170.0, -60.0))
+    
+
+    with open('model', 'rb') as f:
+        genome = pickle.load(f)
+    model = neat.nn.FeedForwardNetwork.create(genome,config)  
 
     while(loop):
 
@@ -337,16 +356,76 @@ def test():
                         bob.set_parabolic_motion_initials(1.2*v_x/constants.MASS, 1.2*v_y/constants.MASS)
         
         
-        for i, bob in enumerate(bobs):
-            if not bob.is_free:
-                end_points[i].move()
-                bob.x, bob.y = end_points[i].x, end_points[i].y
-            else:
-                bob.move()
+        # for i, bob in enumerate(bobs):
+        #     if not bob.is_free:
+        #         end_points[i].move()
+        #         bob.x, bob.y = end_points[i].x, end_points[i].y
+        #     else:
+        #         bob.move()
 
         arc.rotate()
-        arc.draw(screen)
         arc.update_start_stop_pos()
+        arc.draw(screen)
+        py.draw.line(screen,colors.RED,arc.center,arc.start_angle_pos)
+        py.draw.line(screen,colors.RED,arc.center,arc.mid_angle_pos)
+        py.draw.line(screen,colors.RED,arc.center,arc.stop_angle_pos)
+
+
+        inputs = get_inputs(bobs[0],arc,pivot)
+
+        outputs = model.activate(inputs)
+
+        outputs = [0.0,0.0,0.0,0.0]
+        if bobs[0].is_free:
+            bobs[0].move()
+
+        elif end_points[0].is_free:
+
+
+
+
+                # first move end_point and update bob pos
+                end_points[0].move()
+                bobs[0].x, bobs[0].y = end_points[0].x, end_points[0].y
+
+
+                
+                # second check if we should free bob or not based on o/p of nnet
+                if end_points[0].theta1 >= bobs[0].throw_angle:
+                    bobs[0].is_free = True
+                    curr_velocity = end_points[0].theta2*end_points[0].length
+                    curr_angle = end_points[0].theta1
+                    v_x = curr_velocity*math.cos(curr_angle)
+                    v_y = curr_velocity*math.sin(curr_angle)
+                    bobs[0].set_parabolic_motion_initials(1.2*v_x/constants.MASS, 1.2*v_y/constants.MASS)
+        else:
+            # length of string
+            end_points[0].length += 1.0 if outputs[0] >= 0.5 else 0.0
+                
+                # end_point initial_angle
+            end_points[0].theta1 += -1.0 if outputs[1] >= 0.5 else 0.0
+                
+                # end_point throw_angle
+            bobs[0].throw_angle += 1.0 if outputs[2] >= 0.5 else 0.0
+
+# update the pos of end_points[i]
+            end_points[0].reset_attributes()
+
+                # upate bob pos
+            bobs[0].x, bobs[0].y = end_points[0].x, end_points[0].y
+
+        # if we should free the end_point
+            end_points[0].is_free = True if outputs[3] >= 0.5 else False
+
+
+            if end_points[0].is_free:
+                # convert degrees to radians
+                print(bobs[0].throw_angle)
+                print(end_points[0].theta1)
+                bobs[0].throw_angle = math.radians(bobs[0].throw_angle)
+                end_points[0].theta1 = math.radians(end_points[0].theta1)
+                end_points[0].theta2 = math.radians(0.0)
+
 
         
         '''
@@ -354,7 +433,7 @@ def test():
         '''
         for bob in bobs:
             if bob.is_goal_reached(arc.center, arc.radius):
-                pass
+                loop = False
             if bob.is_collision(screen_width, screen_height, arc):
                 loop = False
         
@@ -378,9 +457,9 @@ if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
     # current working directory.
-    # test()
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config_feedforward.txt')
+    # test(config_path)
     run(config_path)
     # pp = [10,20,30,40,50]
     # yo = [11,21,31,41,51]

@@ -9,6 +9,7 @@ class bob():
         self.x, self.y = ep_x, ep_y
         self.v_x, self.v_y = 0.0, 0.0
         self.is_free = False
+        self.goal_reached = False
         self.throw_angle = 0.0
         self.surface = py.Surface((self.width, self.height))
         # self.rect = self.surface.get_rect(topleft = self.update_rect_pos(ep_x, ep_y))
@@ -59,4 +60,4 @@ class bob():
         if dist <= r - math.sqrt(2)*self.height/2.0:
             return True
         else: 
-            return False
+            return self.goal_reached
