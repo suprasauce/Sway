@@ -28,8 +28,8 @@ def get_inputs(bob, arc, pivot):
     inputs.append(pivot[1] - bob.y)
     inputs.append(pivot[0] - bob.x)
     # adding two extra values, so now total 14 inputs
-    inputs.append(arc.mid_angle_pos - bob.y)
-    inputs.append(arc.mid_angle_pos - bob.x)
+    inputs.append(arc.mid_angle_pos[1] - bob.y)
+    inputs.append(arc.mid_angle_pos[0] - bob.x)
     return inputs
 
 def eval_genomes(genomes, config):
