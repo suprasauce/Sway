@@ -87,7 +87,7 @@ def eval_genomes(genomes, config):
                 
                 bob_a = math.dist([bob.x, bob.y], arc.center)**2
                 bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached*1.0*(1.0 / bob_a + bob_b) 
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
 
                 ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)
 
@@ -124,7 +124,8 @@ def eval_genomes(genomes, config):
                 # assign fitness as the bob was alive till the previous frame
                 bob_a = math.dist([bob.x, bob.y], arc.center)**2
                 bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_free*1.0*(1.0 / bob_a + bob_b) 
+                curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
+
 
                 ge[bobs.index(bob)].fitness = max(curr_fitness, ge[bobs.index(bob)].fitness)           
 
@@ -225,7 +226,8 @@ def eval_genomes(genomes, config):
                     # assign fitness as the bob was alive till the previous frame
                     bob_a = math.dist([bob.x, bob.y], arc.center)**2
                     bob_b = math.dist([bob.x, bob.y], arc.bobby)**2
-                    curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_free*1.0*(1.0 / bob_a + bob_b) 
+                    curr_fitness = 1.0 / bob_a + 1.0 / bob_b + bob.is_goal_reached()*1.0*(1.0 / bob_a + bob_b) 
+ 
                     ge[bobs.index(bob)].fitness = curr_fitness
                     
                     # convert degrees to radians
