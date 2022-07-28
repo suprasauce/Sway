@@ -20,8 +20,8 @@ def get_normalised_inputs(inputs):
 
     return inputs
 
-def get_inputs(bob, box, pivot):
-    # total 10 inputs
+def get_inputs(bob, box, pivot, frames):
+    # total 11 inputs
     inputs = []
     inputs.append(bob.y)
     inputs.append(screen_height - bob.y)
@@ -33,6 +33,7 @@ def get_inputs(bob, box, pivot):
     inputs.append(pivot[0] - bob.x)
     inputs.append(box.vertical_vel)
     inputs.append(box.vel_dir)
+    inputs.append(frames)
     inputs = get_normalised_inputs(inputs)
     return inputs
 
@@ -57,8 +58,8 @@ def eval_genomes(genomes, config):
 
     for runs in range(runs_per_net):
 
-         # at 60 fps running one simulation for 30 seconds
-        frames = 600
+         # at 60 fps running one simulation for 20 seconds
+        frames = 1200
         loop = True
 
         box = bx(5*screen_width/6, screen_height/3, screen_height)
@@ -139,7 +140,7 @@ def eval_genomes(genomes, config):
                     # if we are here this means pendulum is not freed by nnet yet
 
                     # first get new inputs
-                    inputs = get_inputs(bob, box, pivot)
+                    inputs = get_inputs(bob, box, pivot, frames)
 
                     # second get nnet outputs
                     # outputs = [len_of_string, initial_angle, throw_angle, is_end_point_free], we have total 4 output nodes
@@ -244,7 +245,7 @@ def eval_genomes(genomes, config):
                 ge.pop(bobs.index(bob))
                 bobs.pop(bobs.index(bob)) 
             else:
-                ge[bobs.index(bob)].fitness += 1
+                ge[bobs.index(bob)].fitness += math.pow(2,runs)
             
 
 def run(config_file):
@@ -264,7 +265,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 100 generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes)
 
     with open('model','wb') as files:
         pickle.dump(winner, files)
