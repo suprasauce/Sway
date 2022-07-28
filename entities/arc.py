@@ -110,13 +110,13 @@ class arc:
         return py.mask.from_surface(self.surface)
 
     # def create_and_get_new_surface(self):
+    #     # rect necessary in order to draw an arc
     #     arc_surface = py.Surface((2*self.radius, 2*self.radius))
     #     arc_surface.fill(colors.WHITE)
     #     # set color_key of the surface to white such that all the white colored
     #     # pixels in that surface become transparent, this is useful when checking
     #     # if masks overlap or not, as non transparent pixel will be set to 1.
     #     arc_surface.set_colorkey(colors.WHITE)
-    #     # rect necessary in order to draw an arc
     #     arc_rect = arc_surface.get_rect()
     #     py.draw.arc(arc_surface, self.color, arc_rect, self.start_angle, self.stop_angle,6)
     #     return arc_surface

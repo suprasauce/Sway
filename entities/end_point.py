@@ -16,6 +16,14 @@ class end_point:
         self.delta_time = constants.DELTA_TIME
         self.is_free = False # free from nnet hold
 
+    def reset(self, ep_x, ep_y):
+        self.x, self.y = ep_x, ep_y
+        self.length = self.get_length()
+        self.theta1 = 0.0
+        self.theta2 = 0.0
+        self.is_free = False
+        self.time = 0.0
+
     def get_length(self):
         return math.dist([self.x, self.y],self.pivot)
 
