@@ -31,8 +31,8 @@ class box:
 
     def draw(self, screen):
         self.move()
-        self.surface.fill(colors.WHITE)
-        py.draw.line(self.surface, colors.RED, self.rect.topleft, self.rect.bottomleft, 2)
-        py.draw.line(self.surface, colors.RED, [self.rect.topright[0] - 2, self.rect.topright[1]], [self.rect.bottomright[0] - 2, self.rect.bottomright[1]], 2)
-        py.draw.line(self.surface, colors.RED, [self.rect.bottomleft[0], self.rect.bottomleft[1]-2], [self.rect.bottomright[0], self.rect.bottomright[1]-2], 2)
+        self.surface.fill(colors.GREEN)
+        # py.draw.line(self.surface, colors.RED, self.rect.topleft, self.rect.bottomleft, 2)
+        # py.draw.line(self.surface, colors.RED, [self.rect.topright[0] - 2, self.rect.topright[1]], [self.rect.bottomright[0] - 2, self.rect.bottomright[1]], 2)
+        # py.draw.line(self.surface, colors.RED, [self.rect.bottomleft[0], self.rect.bottomleft[1]-2], [self.rect.bottomright[0], self.rect.bottomright[1]-2], 2)
         screen.blit(self.surface, self.surface_pos)
