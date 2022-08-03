@@ -4,6 +4,7 @@ from entities.box import box as bx
 from random import randint
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
+from visualize import plot_species, plot_stats
 
 py.init()
 
@@ -261,11 +262,14 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
     
     # Run for up to inf  generations.
-    winner = p.run(eval_genomes)
+    winner = p.run(eval_genomes, 5)
 
     best_five_genomes = stats.best_genomes(5)
+    
+    plot_stats(stats)
+    plot_species(stats)
 
-    with open("best_genome") as f:
+    with open("best_genome",'wb') as f:
         pickle.dump(winner, f)
 
     for i in range(5):
