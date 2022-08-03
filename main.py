@@ -262,10 +262,10 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
     
     # Run for up to inf  generations.
-    winner = p.run(eval_genomes, 5)
+    winner = p.run(eval_genomes, 50)
 
     best_five_genomes = stats.best_genomes(5)
-    
+
     plot_stats(stats)
     plot_species(stats)
 
