@@ -1,4 +1,5 @@
 import math, colors, pygame as py, constants
+import sys
 
 class bob():
     def __init__(self, ep_x, ep_y):

@@ -1,4 +1,5 @@
 import math, os, neat, colors, pygame as py, constants, pickle
+import sys
 from entities.box import box as bx
 from random import randint
 from entities.end_point import end_point as ep
@@ -32,8 +33,8 @@ def get_inputs(bob, box, pivot, frames):
     inputs.append(pivot[1] - bob.y)
     inputs.append(pivot[0] - bob.x)
     inputs.append(box.vertical_vel*box.vel_dir)
-    inputs.append(box.y)
-    inputs.append(screen_height - box.y)
+    inputs.append(box.center[1])
+    inputs.append(screen_height - box.center[1])
     inputs.append(frames)
     inputs = get_normalised_inputs(inputs)
     return inputs
@@ -52,7 +53,7 @@ def eval_genomes(genomes, config):
     
 
     for genome_id, genome in genomes:
-        genome.fitness = 0
+        genome.fitness = 0.0
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
         ge.append(genome)
@@ -71,6 +72,7 @@ def eval_genomes(genomes, config):
         for bob in bobs:
             bob.reset(ep_x, ep_y)
             end_points[bobs.index(bob)].reset(ep_x, ep_y)
+            dis[bobs.index(bob)] = 1000000.0
 
         while(loop and frames > 0):
 
@@ -95,9 +97,10 @@ def eval_genomes(genomes, config):
                 if bob.is_free: 
                     bob.move()
                     bob.goal_reached = bob.is_goal_reached(box)
+
                     distance = math.dist([bob.x, bob.y], box.center)
                     dis[bobs.index(bob)] = min(dis[bobs.index(bob)], distance)
-
+                    
                     if bob.is_collision(screen_width, screen_height, box):
                         ge[bobs.index(bob)].fitness += 1/dis[bobs.index(bob)]
                         nnets.pop(bobs.index(bob))
@@ -124,7 +127,7 @@ def eval_genomes(genomes, config):
                         dis.pop(bobs.index(bob))
                         bobs.pop(bobs.index(bob))
                         continue
-                    
+            
                     # second check if we should free bob or not based on o/p of nnet
                     if end_points[bobs.index(bob)].theta1 >= bob.throw_angle:
                         bob.is_free = True
@@ -256,12 +259,18 @@ def run(config_file):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
     p.add_reporter(neat.Checkpointer(5))
-
+    
     # Run for up to inf  generations.
     winner = p.run(eval_genomes)
 
-    with open('model','wb') as files:
-        pickle.dump(winner, files)
+    best_five_genomes = stats.best_genomes(5)
+
+    with open("best_genome") as f:
+        pickle.dump(winner, f)
+
+    for i in range(5):
+        with open(str(i+1)) as f:
+            pickle.dump(best_five_genomes[0], f)
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))

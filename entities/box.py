@@ -1,20 +1,20 @@
 import pygame as py
 import colors
-from random import randint
+import random
 
 class box:
     def __init__(self, s_pos_x, s_pos_y, screen_height):
         self.screen_height = screen_height
         self.surface_pos = [s_pos_x, s_pos_y]
-        self.surface = py.Surface((200,100))
+        self.surface = py.Surface((50,50))
         self.rect = self.surface.get_rect()
-        self.surface.set_colorkey(colors.WHITE)
-        self.vertical_vel = randint(1,5)
-        self.vel_dir = -1 if randint(0,1) == 1 else 1
+        #self.surface.set_colorkey(colors.WHITE)
+        self.vertical_vel = random.uniform(2,4)
+        self.vel_dir = 1
         self.center = self.get_center()
         
     def get_center(self):
-        return [self.surface_pos[0] + self.rect.width/2.0, self.surface_pos[1]]
+        return [self.surface_pos[0] + 25, self.surface_pos[1] + 25]
 
     def get_mask(self):
         return py.mask.from_surface(self.surface)
@@ -24,9 +24,9 @@ class box:
         if self.surface_pos[1] < 0:
             self.vel_dir *= -1
             self.surface_pos[1] = 0
-        elif self.surface_pos[1] > self.screen_height - 100:
+        elif self.surface_pos[1] > self.screen_height - 50:
             self.vel_dir *= -1
-            self.surface_pos[1] = self.screen_height - 100
+            self.surface_pos[1] = self.screen_height - 50
         self.center = self.get_center()
 
     def draw(self, screen):
