@@ -50,6 +50,10 @@ def lets_play(num_bobs, mainnets):
     ep_x, ep_y = screen_width/4, screen_height/3 + 1.0
     box = bx(5*screen_width/6, 0, screen_height)
 
+    player_bob = b(ep_x, ep_y)
+    player_end_point = ep(ep_x, ep_y, pivot)
+    player_mouse_down = False
+
     for i in range(num_bobs):
         bobs.append(b(ep_x, ep_y))
         end_points.append(ep(ep_x, ep_y, pivot))
@@ -62,19 +66,26 @@ def lets_play(num_bobs, mainnets):
             if event.type == py.QUIT:
                 loop = False
             elif event.type == py.MOUSEBUTTONDOWN:
-                pass
+                player_mouse_down = True
+                player_end_point.is_free = False
             elif event.type == py.MOUSEBUTTONUP:
-                pass
+                if player_mouse_down:
+                    player_end_point.is_free = True
+                player_mouse_down = False
             elif event.type == py.KEYDOWN:
                 if event.key == py.K_SPACE:
-                    pass
+                    player_bob.is_free = True
+                    curr_velocity = player_end_point.theta2*player_end_point.length
+                    curr_angle = player_end_point.theta1
+                    v_x = curr_velocity*math.cos(curr_angle)
+                    v_y = curr_velocity*math.sin(curr_angle)
+                    player_bob.set_parabolic_motion_initials(1.2*v_x/constants.MASS, 1.2*v_y/constants.MASS)
+
 
         # drawing the box updates its location too
         box.draw(screen)
 
-        ''' 
-        This loop handles movements of agent bobs
-        '''
+        # This loop handles movements of agent bobs
         for bob in bobs[:]:
         
             if bob.is_free: 
@@ -168,9 +179,7 @@ def lets_play(num_bobs, mainnets):
                     end_points[bobs.index(bob)].theta2 = math.radians(0.0)
                     
         
-        '''
-        This for loop manages all the drawing stuff
-        '''
+        # This for loop manages all the drawing stuff
         for bob in bobs:
             if not bob.goal_reached:
                 bob.draw(screen)
@@ -178,6 +187,31 @@ def lets_play(num_bobs, mainnets):
                     # draw string
                     py.draw.line(screen, colors.GREEN, pivot, [end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y],1)
 
+        
+        # This handles players_bob
+        if player_bob.is_free:
+            player_bob.move()
+        else:
+            if player_end_point.is_free:
+                player_end_point.move()
+                player_bob.x, player_bob.y = player_end_point.x, player_end_point.y
+            elif player_mouse_down:
+                player_end_point.player_reset_attributes(py.mouse.get_pos())
+                player_bob.x, player_bob.y = player_end_point.x, player_end_point.y
+
+        # check players collision with walls
+        if player_bob.is_collision(screen_width, screen_height, box):
+            loop = False
+        # check if player hit box
+        if player_bob.is_goal_reached(box):
+            player_bob.goal_reached = True
+            loop = False
+
+        # after checking all collisions drawing of player happens
+        if not player_bob.is_free:
+            py.draw.line(screen, colors.GREEN, pivot, [player_end_point.x, player_end_point.y],1)
+        player_bob.draw(screen)
+        
         frames -= 1
         py.display.update()
 

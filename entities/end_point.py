@@ -1,6 +1,6 @@
 import math
 from random import randint
-import constants
+import constants, numpy as np
 
 
 class end_point:
@@ -43,14 +43,14 @@ class end_point:
         return round(math.dist([self.x, self.y], self.pivot))
 
 
-    # def get_angle(self):
-    #     temp, sign = 0.0, 1
-    #     if self.y < self.pivot[1]:
-    #         temp = 180 if self.is_free else math.pi
-    #         sign = -1
-    #     if self.x < self.pivot[0]:
-    #         temp *= -1.0
-    #     return temp + sign*math.asin((self.x - self.pivot[0])/self.length)
+    def get_angle(self):
+        temp, sign = 0.0, 1
+        if self.y < self.pivot[1]:
+            temp = 180 if self.is_free else math.pi
+            sign = -1
+        if self.x < self.pivot[0]:
+            temp *= -1.0
+        return temp + sign*math.asin((self.x - self.pivot[0])/self.length)
 
     def reset_attributes(self, new_x = 0, new_y = 0):
         self.x, self.y = self.get_new_pos()
@@ -59,5 +59,12 @@ class end_point:
         # self.time = 0.0
         # self.theta1 = self.get_angle()
         # self.theta2 = np.radians(0.0)
+
+    def player_reset_attributes(self, pos):
+        self.x, self.y = pos[0], pos[1]
+        self.length = self.get_length()
+        self.time = 0.0
+        self.theta1 = self.get_angle()
+        self.theta2 = np.radians(0.0)
 
     
