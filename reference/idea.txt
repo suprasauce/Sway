@@ -1,2 +1,0 @@
-rather than making a rope object, make a point which does pendulum motion around the
-pivot 

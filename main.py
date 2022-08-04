@@ -1,10 +1,11 @@
+from distutils.command.config import config
 import math, os, neat, colors, pygame as py, constants, pickle
 import sys
 from entities.box import box as bx
 from random import randint
 from entities.end_point import end_point as ep
 from entities.bob import bob as b
-from visualize import plot_species, plot_stats
+from visualize import draw_net, plot_species, plot_stats
 
 py.init()
 
@@ -103,7 +104,7 @@ def eval_genomes(genomes, config):
                     dis[bobs.index(bob)] = min(dis[bobs.index(bob)], distance)
                     
                     if bob.is_collision(screen_width, screen_height, box):
-                        ge[bobs.index(bob)].fitness += 1/dis[bobs.index(bob)]
+                        ge[bobs.index(bob)].fitness += 1.0/dis[bobs.index(bob)]
                         nnets.pop(bobs.index(bob))
                         end_points.pop(bobs.index(bob))
                         ge.pop(bobs.index(bob))
@@ -121,7 +122,7 @@ def eval_genomes(genomes, config):
                     dis[bobs.index(bob)] = min(dis[bobs.index(bob)], distance)
 
                     if bob.is_collision(screen_width, screen_height, box):
-                        ge[bobs.index(bob)].fitness += 1/dis[bobs.index(bob)]
+                        ge[bobs.index(bob)].fitness += 1.0/dis[bobs.index(bob)]
                         nnets.pop(bobs.index(bob))
                         end_points.pop(bobs.index(bob))
                         ge.pop(bobs.index(bob))
@@ -242,7 +243,7 @@ def eval_genomes(genomes, config):
                 dis.pop(bobs.index(bob))
                 bobs.pop(bobs.index(bob)) 
             else:
-                ge[bobs.index(bob)].fitness += 1/dis[bobs.index(bob)]
+                ge[bobs.index(bob)].fitness += 1.0/dis[bobs.index(bob)]
             
 
 def run(config_file):
@@ -262,7 +263,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
     
     # Run for up to inf  generations.
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes, 60)
 
     best_five_genomes = stats.best_genomes(5)
 
@@ -273,8 +274,9 @@ def run(config_file):
         pickle.dump(winner, f)
 
     for i in range(5):
-        with open(str(i+1)) as f:
-            pickle.dump(best_five_genomes[0], f)
+        with open(str(i+1), 'wb') as f:
+            pickle.dump(best_five_genomes[i], f)
+
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
