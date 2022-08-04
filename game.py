@@ -1,4 +1,4 @@
-import pygame as py, constants, colors, neat, os, pickle, math
+import pygame as py, constants, colors, neat, os, pickle, math, random
 from entities.bob import bob as b
 from entities.end_point import end_point as ep
 from entities.box import box as bx
@@ -39,8 +39,15 @@ def get_inputs(bob, box, pivot, frames):
     inputs = get_normalised_inputs(inputs)
     return inputs
 
-def lets_play(num_bobs, mainnets):
-    nnets = deepcopy(mainnets)
+def lets_play(num_bobs):
+    nnets = []
+    temp = deepcopy(global_nnets)
+    random.shuffle(temp)
+    for i in range(num_bobs):
+        nnets.append(temp[i])
+    
+    del temp
+
     bobs = []
     end_points = []
     
@@ -217,9 +224,74 @@ def lets_play(num_bobs, mainnets):
 
 
 def run_menu():
-    lets_play(6, global_nnets)
-    pass
+    num_agents = 1
+    menu_loop = True
+    font = py.font.Font('fav_font.ttf', 32)
+    start = font.render("START", True, colors.RED)
+    exit = font.render("EXIT", True, colors.RED)
+    plus = font.render("+", True, colors.RED)
+    minus = font.render("-", True, colors.RED)
+    agents = font.render(str(num_agents) + " AGENTS", True, colors.DARK_PURPLE)
+    start_rect = start.get_rect()
+    exit_rect = exit.get_rect()
+    plus_rect = plus.get_rect()
+    minus_rect = minus.get_rect()
+    agents_rect = agents.get_rect()
+    start_rect.center = [screen_width/2, screen_height/2]
+    exit_rect.center = [screen_width/2, screen_height/2 + 200]
+    plus_rect.center = [screen_width/2 - 200, screen_height/2 + 100]
+    minus_rect.center = [screen_width/2 + 200, screen_height/2 + 100]
+    agents_rect.center = [screen_width/2, screen_height/2 + 100]
+    start_high = False
+    exit_high = False
+    plus_high = False
+    minus_high = False
 
+    while menu_loop:
+        clock.tick(fps)
+        screen.fill(colors.WHITE)
+        for event in py.event.get():
+            if event.type == py.QUIT:
+                menu_loop = False
+            elif event.type == py.MOUSEBUTTONDOWN:
+                if exit_high:
+                    menu_loop = False
+                elif start_high: 
+                    lets_play(num_agents)
+                elif plus_high:
+                    num_agents = min(num_agents+1,6)
+                elif minus_high:
+                    num_agents = max(num_agents - 1, 1)
+
+        # render the fonts
+        start = font.render("START", True, colors.LIGHT_PURPLE if start_high else colors.DARK_PURPLE)
+        exit = font.render("EXIT", True, colors.LIGHT_PURPLE if exit_high else colors.DARK_PURPLE)
+        plus = font.render("+", True, colors.LIGHT_RED if plus_high or num_agents ==  6 else colors.RED)
+        minus = font.render("-", True, colors.LIGHT_RED if minus_high or num_agents ==1 else colors.RED)
+        agents = font.render(str(num_agents) + " AGENTS", True, colors.DARK_PURPLE)
+
+
+        screen.blit(start, start_rect.topleft)
+        screen.blit(exit, exit_rect.topleft)
+        screen.blit(plus, plus_rect.topleft)
+        screen.blit(minus, minus_rect.topleft)
+        screen.blit(agents, agents_rect.topleft)
+
+        if start_rect.collidepoint(py.mouse.get_pos()):
+            start_high = True
+        elif exit_rect.collidepoint(py.mouse.get_pos()): 
+            exit_high = True
+        elif plus_rect.collidepoint(py.mouse.get_pos()):
+            plus_high = True
+        elif minus_rect.collidepoint(py.mouse.get_pos()):
+            minus_high = True
+        else:
+            start_high = False
+            exit_high = False
+            plus_high = False
+            minus_high = False
+
+        py.display.update()
 
 def main():
     local_dir = os.path.dirname(__file__)
