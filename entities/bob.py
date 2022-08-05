@@ -2,10 +2,10 @@ import math, colors, pygame as py, constants
 import sys
 
 class bob():
-    def __init__(self, ep_x, ep_y):
+    def __init__(self, ep_x, ep_y, color):
         self.width = constants.BOB_WIDTH
         self.height = constants.BOB_HEIGHT
-        self.color = colors.GREEN
+        self.color = color
         # the bob center will be endpoint_center
         self.x, self.y = ep_x, ep_y
         self.v_x, self.v_y = 0.0, 0.0
@@ -24,7 +24,7 @@ class bob():
 
     def draw(self, screen):
         # bob_surface = self.create_and_get_new_surface()
-        self.surface.fill(colors.GREEN)
+        self.surface.fill(self.color)
         screen.blit(self.surface, (self.x - self.width/2, self.y - self.height/2))
 
     def set_parabolic_motion_initials(self, v_x, v_y):

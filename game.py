@@ -57,12 +57,12 @@ def lets_play(num_bobs):
     ep_x, ep_y = screen_width/4, screen_height/3 + 1.0
     box = bx(5*screen_width/6, 0, screen_height)
 
-    player_bob = b(ep_x, ep_y)
+    player_bob = b(ep_x, ep_y, colors.DARK_PURPLE)
     player_end_point = ep(ep_x, ep_y, pivot)
     player_mouse_down = False
 
     for i in range(num_bobs):
-        bobs.append(b(ep_x, ep_y))
+        bobs.append(b(ep_x, ep_y, colors.LIGHT_PURPLE))
         end_points.append(ep(ep_x, ep_y, pivot))
 
     while(loop):
@@ -189,10 +189,11 @@ def lets_play(num_bobs):
         # This for loop manages all the drawing stuff
         for bob in bobs:
             if not bob.goal_reached:
-                bob.draw(screen)
                 if not bob.is_free:
                     # draw string
-                    py.draw.line(screen, colors.GREEN, pivot, [end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y],1)
+                    py.draw.line(screen, colors.BLACK, pivot, [end_points[bobs.index(bob)].x, end_points[bobs.index(bob)].y],4)
+                bob.draw(screen)
+        
 
         
         # This handles players_bob
@@ -216,7 +217,8 @@ def lets_play(num_bobs):
 
         # after checking all collisions drawing of player happens
         if not player_bob.is_free:
-            py.draw.line(screen, colors.GREEN, pivot, [player_end_point.x, player_end_point.y],1)
+            py.draw.line(screen, colors.BLACK, pivot, [player_end_point.x, player_end_point.y],4)
+        
         player_bob.draw(screen)
         
         frames -= 1
