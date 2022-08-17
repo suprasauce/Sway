@@ -301,11 +301,11 @@ def run_menu():
         py.display.update()
 
 def main():
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config_feedforward.txt')
+    #local_dir = os.path.dirname(__file__)
+    #config_path = os.path.join(local_dir, 'config_feedforward.txt')
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
+                         'config_feedforward.txt')
     
     # adding my best 6 models to play against the human counterpart
     for i in range(6):
