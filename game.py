@@ -53,6 +53,7 @@ def lets_play(num_bobs):
     
     loop = True
     frames = 1200
+    player_game_over = False
     pivot = (screen_width/4, screen_height/3)
     ep_x, ep_y = screen_width/4, screen_height/3 + 1.0
     box = bx(5*screen_width/6, 0, screen_height)
@@ -209,18 +210,22 @@ def lets_play(num_bobs):
 
         # check players collision with walls
         if player_bob.is_collision(screen_width, screen_height, box):
-            loop = False
+            player_game_over = True
         # check if player hit box
         if player_bob.is_goal_reached(box):
             player_bob.goal_reached = True
-            loop = False
+            player_game_over = True
 
         # after checking all collisions drawing of player happens
         if not player_bob.is_free:
             py.draw.line(screen, colors.BLACK, pivot, [player_end_point.x, player_end_point.y],4)
         
-        player_bob.draw(screen)
+        if not player_bob.goal_reached:
+            player_bob.draw(screen)
         
+        if player_game_over and len(bobs) == 0:
+            loop = False
+
         frames -= 1
         py.display.update()
 
